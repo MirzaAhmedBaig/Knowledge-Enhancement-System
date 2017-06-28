@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title></title>
+    <link rel="icon" href="../images/favicon.png">
+    <link rel="stylesheet" href="../static/bootstrap/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="../static/bootstrap/custom/custom.min.css"/>
+    <link rel="stylesheet" href="../static/jquery/plugins/medium_ed/css/medium-editor.min.css"/>
+    <link rel="stylesheet" href="../static/jquery/plugins/medium_ed/css/themes/beagle.min.css"/>
+    <link rel="stylesheet" href="style.min.css"/>
+    <style>
+
+    </style>
+</head>
+<body id="home" ng-app="mainApp">
+
+<div class="navbar navbar-default navbar-fixed-top" ng-controller="OnLoadController">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button class="navbar-toggle pull-left" id="toggleGroupButton">
+                <span style="color: white" class="glyphicon glyphicon-list"></span></button>
+            <a href="../" class="navbar-brand"><img src="../images/logo.png">
+                <span style="color:#ffc75e;">know</span><span style="color: white">en</span>
+            </a>
+            <button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#navbar-main">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+        </div>
+        <div class="navbar-collapse collapse" id="navbar-main">
+            <ul class="nav navbar-nav">
+                <li><a href="">Whats New</a></li>
+                <li><a href="">Help</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                        <img ng-src="{{imageurl}}"
+                             class="img-circle special-img">&nbsp;&nbsp;&nbsp;<?= $_SESSION['user_name'] ?>
+                        <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a href="" onclick="$('#settingModel').modal();"><span
+                                    class="glyphicon glyphicon-user"></span>&nbsp;&nbsp;&nbsp;User
+                                Settings</a></li>
+                        <li><a href="../private/operations/logout.php"><span class="glyphicon glyphicon-log-out"></span>&nbsp;&nbsp;&nbsp;Logout</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+
+<div class="container-fluid container-main">
+    <div id="bs-models"><?php include 'res/bsmodels.php'; ?></div>
+    <div ng-controller="MainAppController">
+        <div class="row">
+            <div class="sidebar col-sm-3 col-md-3 col-lg-2 scrollbar" id="group-list">
+                <div id="score-label">Question Score / Answer Score</div>
+                <div id="group-score">{{questionLikes}} / {{answerLikes}}</div>
+                <ul class="menu-bar-stack">
+                    <li class="menu-bar-item heading"><a>Admin</a></li>
+                    <li class="menu-bar-item" id="gh-{{a[0]}}" ng-repeat="a in GroupList.admins"><a href=""
+                                                                                                    ng-click="changeGroup(a[0],1)">{{a[1]}}</a>
+                    </li>
+
+                    <li class="menu-bar-item heading"><a>Special Member</a></li>
+                    <li class="menu-bar-item" id="gh-{{a[0]}}" ng-repeat="a in GroupList.specialMembers">
+                        <a href="" class="menu-bar-item" ng-click="changeGroup(a[0],2)">{{a[1]}}</a>
+                    </li>
+
+                    <li class="menu-bar-item heading"><a>Member</a></li>
+                    <li class="menu-bar-item" id="gh-{{a[0]}}" ng-repeat="a in GroupList.members">
+                        <a href="" class="menu-bar-item" ng-click="changeGroup(a[0],3)">{{a[1]}}</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="main  col-sm-9 col-sm-offset-3 col-md-9 col-md-offset-3 col-lg-10 col-lg-offset-2 scrollbar"
+                 style="padding-top: 0">
+
+                <div class="toolbar">
+                    <div class="btn-group">
+                        <button class="btn btn-default" ng-click="showQuestions()" ng-disabled="!isNavigated()"><span
+                                class="glyphicon glyphicon-arrow-left"></span></button>
+                        <button class="btn btn-default" ng-click="showAnswers(null);refreshGroup()" ng-disabled="!isBacked()"><span
+                                class="glyphicon glyphicon-arrow-right"></span></button>
+                    </div>
+
+                    <div class="btn-group">
+                        <button class="btn btn-default" ng-click="refreshGroup()" ng-disabled="!isGroupSelected()"><span
+                                class="glyphicon glyphicon-refresh"></span>
+                        </button>
+                    </div>
+
+                    <div class="btn-group">
+                        <button class="btn btn-default" ng-click="setMembersList()" ng-disabled="!isGroupSelected()"
+                                onclick="$('#addMembersModel').modal();">
+                            <span class="glyphicon glyphicon-info-sign"></span>
+                        </button>
+                        <button class="btn btn-default" ng-click="false;" onclick="$('#newGroupModel').modal();">
+                            <span class="glyphicon glyphicon-plus-sign"></span>
+                        </button>
+                        <button class="btn btn-default" onclick="$('#askQuestionModel').modal();"
+                                ng-click="setQuestionTypesList()"
+                                ng-disabled="!isGroupSelected()">
+                            <span class="glyphicon glyphicon-question-sign"></span>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="group-contents">
+
+                    <div id="qlist" class="qlist" ng-if="currentTab == 0">
+                        <div class="qframe" ng-repeat="q in questions">
+                            <div class="rating">
+                                <img class="asker" ng-src="{{q[6]}}">
+                                <span class="asker">{{q[4]}}</span>
+                            </div>
+                            <div class="content">
+                                <p class="quest"><a href="" ng-click="showAnswers(q[0])"><span
+                                            ng-bind-html="q[1]"></span><span
+                                            class="badge">{{getQTName(q[3])}}</span></a></p>
+                                <p>{{q[2]}}</p>
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                        <script></script>
+                    </div>
+
+                    <div id="alist" class="qlist" ng-if="currentTab == 1">
+                        <div id="qblock">
+
+                            <div class="qframe">
+                                <div class="rating">
+                                    <img class="asker" ng-src="">
+                                    <span class="asker">{{answers[4]}}</span>
+                                    <span class="points">{{answers[5]}}</span>
+                                    <span class="asker">Rating</span>
+                                </div>
+                                <div class="content">
+                                    <p class="quest">{{answers[1]}}<span class="badge">{{getQTName(answers[3])}}</span>
+                                    </p>
+                                    <p>{{answers[2]}}</p>
+                                </div>
+                                <ul class="btn-group pull-right">
+                                    <li class="btn btn-default btn-sm" ng-click="openQCommentBox(answers[0])">Comment
+                                    </li>
+                                    <li class="btn btn-default btn-sm" ng-click="openSolutionBox(answers[0])">Solve</li>
+                                </ul>
+                                <select class="stars pull-right" data-id="{{answers[0]}}" data-type="q"
+                                        data-oldlikes="{{answers[6]}}">
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                    <option value="6">6</option>
+                                    <option value="7">7</option>
+                                    <option value="8">8</option>
+                                    <option value="9">9</option>
+                                    <option value="10">10</option>
+
+                                </select>
+                                <div class="clearfix"></div>
+                            </div>
+
+                            <div class="qframe comment" ng-repeat="c in answers[7]">
+                                <div class="rating">
+                                    <img class="asker" src="../images/user.png">
+                                    <span class="asker">{{c[1]}}</span>
+                                </div>
+                                <div class="content">
+                                    <p ng-bind-html="c[0]"></p>
+                                </div>
+                                <div class="clearfix"></div>
+                            </div>
+                        </div>
+                        <div id="ablock">
+                            <div ng-repeat="a in answers[8]" id="ansid{{a[0]}}">
+
+                                <div class="qframe answer">
+                                    <div class="rating">
+                                        <img class="asker" src="../images/user.png">
+                                        <span class="asker">{{a[2]}}</span>
+                                        <span class="points">{{a[3]}}</span>
+                                        <span class="asker">Rating</span>
+                                    </div>
+                                    <div class="content">
+                                        <p ng-bind-html="a[1]"></p>
+                                    </div>
+                                    <ul class="btn-group pull-right">
+                                        <li class="btn btn-default btn-sm" ng-click="openACommentBox(a[0])">Comment</li>
+                                    </ul>
+
+                                    <select class="stars pull-right" data-id="{{a[0]}}" data-type="a"
+                                            data-oldlikes="{{a[4]}}">
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                        <option value="6">6</option>
+                                        <option value="7">7</option>
+                                        <option value="8">8</option>
+                                        <option value="9">9</option>
+                                        <option value="10">10</option>
+                                    </select>
+
+                                    <div class="clearfix"></div>
+                                </div>
+
+                                <div class="qframe comment" ng-repeat="ac in a[5]">
+                                    <div class="rating">
+                                        <img class="asker" src="../images/user.png">
+                                        <span class="asker">{{ac[1]}}</span>
+                                    </div>
+                                    <div class="content">
+                                        <p ng-bind-html="ac[0]"></p>
+                                    </div>
+                                    <div class="clearfix"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../static/angularjs/angular.min.js"></script>
+<script type="text/javascript" src="../static/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="../static/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../static/bootstrap/custom/custom.min.js"></script>
+<script type="text/javascript" src="scriptController.min.js"></script>
+<script type="text/javascript" src="../static/jquery/plugins/jquery.combostars.min.js"></script>
+<script type="text/javascript" src="../static/jquery/plugins/croppie.min.js"></script>
+<script type="text/javascript" src="../static/jquery/plugins/medium_ed/js/medium-editor.min.js"></script>
+<script type="text/javascript" src="../static/jquery/plugins/medium_ed/js/MediumButton.min.js"></script>
+<script type="text/javascript" src="../static/angularjs/angular-sanitize.min.js"></script>
+<script type="text/javascript" src="script.min.js"></script>
+</body>
+</html>

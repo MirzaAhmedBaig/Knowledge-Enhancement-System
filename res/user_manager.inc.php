@@ -1,0 +1,1 @@
+<?php/** * User: AamerSOHEL * Date: 20-09-2016 * Time: 12:09 PM */ob_start();session_start();function isLoggedIn() {  if (isset($_SESSION['id']))	return true;  return false;}function getLoggedInUserName() {  return $_SESSION['id'];}

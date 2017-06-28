@@ -1,0 +1,1 @@
+<?php/** * User: AamerSOHEL * Date: 07-10-2016 * Time: 03:19 PM */include_once $_SERVER['DOCUMENT_ROOT'] . '\res\user_manager.inc.php';if(!isLoggedIn()) {	die();}session_destroy();session_commit();header('Location: /');
